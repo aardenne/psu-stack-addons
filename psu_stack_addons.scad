@@ -26,12 +26,13 @@
 part = "frame"; // [frame, cover, front, preview]
 
 /* [Frame] */
-frame_h = 150;     // 150 fits all five front/back holes under the flare
+frame_h = 150;     // hole faces UP. 150 fits all five front/back holes
 flange = 10;
 end_t = 16;        // left and right, holds the 9 mm pocket (centre is 7.5 mm in)
-front_t = 8;       // front and back
-post = 22;         // corner post, along the depth
-flare = 8;         // 45 degree, both ends, same direction
+front_t = 10;      // front and back walls
+lip = 4;           // flange sticks out past the front and back walls
+post = 22;
+flare = 8;         // 45 degree, both ends, same direction, at the TOP only
 
 /* [Cover and front plate] */
 cover_t = 6;
@@ -91,8 +92,8 @@ module screw_y(x, y_out, y_in, z) {
 module ring(z, h) {
     difference() {
         translate([0, 0, z]) cube([size_x, size_y, h]);
-        translate([end_t, front_t, z - 0.1])
-            cube([size_x - 2 * end_t, size_y - 2 * front_t, h + 0.2]);
+        translate([end_t, lip + front_t, z - 0.1])
+            cube([size_x - 2 * end_t, size_y - 2 * (lip + front_t), h + 0.2]);
     }
 }
 
@@ -126,10 +127,10 @@ module frame(h) {
         union() {
             ring(0, flange);
             ring(h - flange, flange);
-            // front and back, full width
-            translate([0, 0, z_wall])
+            // front and back walls, set in so the flange is the rim
+            translate([0, lip, z_wall])
                 cube([size_x, front_t, wall_h]);
-            translate([0, size_y - front_t, z_wall])
+            translate([0, size_y - lip - front_t, z_wall])
                 cube([size_x, front_t, wall_h]);
             // corner posts, full outer width, both ends the same
             for (x = [0, size_x - end_t])
@@ -158,8 +159,8 @@ module frame(h) {
         for (z = face_z)
             if (z > flange + cbore_d / 2 + 1 && z < z_max)
                 for (x = hole_x) {
-                    screw_y(x, 0, front_t, z);
-                    screw_y(x, size_y, size_y - front_t, z);
+                    screw_y(x, 0, lip + front_t, z);
+                    screw_y(x, size_y, size_y - lip - front_t, z);
                 }
     }
 }
